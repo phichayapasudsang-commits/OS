@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux Commands Quiz (58 ข้อ)</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; margin: 0; padding: 16px; display: flex; justify-content: center; }
+    .quiz-container { width: 100%; max-width: 600px; background: #1e293b; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9rem; color: #94a3b8; }
+    .progress-bar { width: 100%; height: 6px; background: #334155; border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+    .progress-fill { height: 100%; background: #38bdf8; width: 0%; transition: width 0.2s; }
+    .category-tag { display: inline-block; background: #0284c7; color: white; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: bold; margin-bottom: 12px; }
+    .question-title { font-size: 1.15rem; font-weight: 600; line-height: 1.5; margin-bottom: 20px; color: #f1f5f9; }
+    .choices-list { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn { background: #334155; border: 2px solid transparent; border-radius: 10px; padding: 12px 14px; text-align: left; color: #e2e8f0; font-size: 0.95rem; font-family: ui-monospace, monospace; cursor: pointer; transition: 0.15s; outline: none; }
+    .choice-btn:active { transform: scale(0.98); }
+    .choice-btn.correct { background: #065f46 !important; border-color: #34d399 !important; color: #ecfdf5 !important; }
+    .choice-btn.incorrect { background: #991b1b !important; border-color: #f87171 !important; color: #fef2f2 !important; }
+    .choice-btn:disabled { cursor: default; }
+    .feedback-box { margin-top: 16px; padding: 12px; border-radius: 8px; font-size: 0.95rem; display: none; }
+    .feedback-box.show { display: block; }
+    .feedback-correct { background: #064e3b; color: #a7f3d0; border: 1px solid #059669; }
+    .feedback-wrong { background: #7f1d1d; color: #fecaca; border: 1px solid #dc2626; }
+    .nav-buttons { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+    .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; background: #38bdf8; color: #0f172a; }
+    .btn:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+    .score-summary { text-align: center; padding: 30px 10px; }
+    .score-number { font-size: 3rem; font-weight: 800; color: #38bdf8; margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+<div class="quiz-container" id="quizCard">
+  <div class="header">
+    <span id="qIndex">ข้อที่ 1 / 58</span>
+    <span id="qScore">คะแนน: 0</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="category-tag" id="qCategory">Category</span>
+  <div class="question-title" id="qTitle">Loading question...</div>
+  <div class="choices-list" id="choicesList"></div>
+  <div class="feedback-box" id="feedbackBox"></div>
+  <div class="nav-buttons">
+    <button class="btn" id="nextBtn" disabled onclick="nextQuestion()">ข้อถัดไป ➔</button>
+  </div>
+</div>
+
+<script>
+const quizData = [
+  { c: "1. Quiz: Process Management", q: "1. Show Linux distro (distributor, description, release, codename)", a: "C", ch: { A: "cat /etc/version", B: "uname -a", C: "lsb_release -a", D: "distro -v" } },
+  { c: "1. Quiz: Process Management", q: "2. Show kernel version", a: "A", ch: { A: "uname -r", B: "kernel -v", C: "cat /proc/distro", D: "ls -k" } },
+  { c: "1. Quiz: Process Management", q: "3. Show kernel (file) and its size", a: "D", ch: { A: "file -s /boot/vmlinuz", B: "stat /boot/kernel", C: "du -h /boot/vmlinuz", D: "ls -lh /boot/vmlinuz-$(uname -r)" } },
+  { c: "1. Quiz: Process Management", q: "4. Show CPU information", a: "B", ch: { A: "cpustat -a", B: "lscpu", C: "cat /proc/hardware", D: "getcpu" } },
+  { c: "1. Quiz: Process Management", q: "5. Run a process with lowest priority (least favorable)", a: "C", ch: { A: "nice -n -20 sleep 10", B: "nice -n 0 sleep 10", C: "nice -n 19 sleep 10", D: "renice -p 19 sleep 10" } },
+  { c: "1. Quiz: Process Management", q: "6. Run a process (> 60 sec), pause, and resume", a: "D", ch: { A: "sleep 100 → Ctrl + C → bg", B: "sleep 100 → Ctrl + D → resume", C: "sleep 100 → Ctrl + X → start", D: "sleep 100 → Ctrl + Z → fg" } },
+  { c: "1. Quiz: Process Management", q: "7. Run a process (> 60 sec) in background, and terminate", a: "B", ch: { A: "sleep 100 bg → kill 1", B: "sleep 100 & → kill %1", C: "nohup sleep 100 → stop %1", D: "sleep 100 & → exit %1" } },
+  { c: "1. Quiz: Process Management", q: "8. Run three processes in background, and bring the second to the foreground", a: "C", ch: { A: "sleep 70 & (x3) → fg 2", B: "sleep 70 & (x3) → bring 2", C: "sleep 70 & (x3) → fg %2", D: "sleep 70 & (x3) → job -f 2" } },
+  { c: "1. Quiz: Process Management", q: "9. Run three processes in background, and terminate the first", a: "D", ch: { A: "sleep 70 & (x3) → kill 1", B: "sleep 70 & (x3) → killall sleep", C: "sleep 70 & (x3) → stop 1", D: "sleep 70 & (x3) → kill %1" } },
+  { c: "1. Quiz: Process Management", q: "10. Run two processes and connect them using a pipe", a: "B", ch: { A: "cat /etc/passwd > grep home", B: "cat /etc/passwd | grep home", C: "cat /etc/passwd & grep home", D: "cat /etc/passwd >> grep home" } },
+  { c: "1. Quiz: Process Management", q: "11. Show uptime (elapsed time since booting)", a: "B", ch: { A: "uptime -all", B: "uptime -p", C: "boot -time", D: "last -boot" } },
+  { c: "2. Quiz: Memory Management", q: "12. Show memory information", a: "C", ch: { A: "cat /sys/memory", B: "cat /etc/ram", C: "cat /proc/meminfo", D: "showmem -a" } },
+  { c: "2. Quiz: Memory Management", q: "13. Show amount of free and used memory in the system", a: "D", ch: { A: "mem -h", B: "df -m", C: "ram -u", D: "free -h" } },
+  { c: "3. Quiz: Storage Management", q: "14. Create a file, rename, and delete", a: "B", ch: { A: "touch myfile.txt → ren myfile.txt newfile.txt → del newfile.txt", B: "touch myfile.txt → mv myfile.txt newfile.txt → rm newfile.txt", C: "make myfile.txt → cp myfile.txt newfile.txt → erase newfile.txt", D: "echo myfile.txt → mv myfile.txt newfile.txt → rmdir newfile.txt" } },
+  { c: "3. Quiz: Storage Management", q: "15. Create a folder, rename, and delete", a: "C", ch: { A: "mkdir myfolder → rename myfolder newmyfolder → delete myfolder", B: "folder myfolder → mv myfolder newmyfolder → deldir myfolder", C: "mkdir myfolder → mv myfolder newmyfolder → rmdir myfolder", D: "md myfolder → cp myfolder newmyfolder → rm myfolder" } },
+  { c: "3. Quiz: Storage Management", q: "16. Create a file and change permission so that only the owner can read", a: "B", ch: { A: "touch myfile.txt → chmod 700 myfile.txt", B: "touch myfile.txt → chmod 400 myfile.txt", C: "touch myfile.txt → chmod 600 myfile.txt", D: "touch myfile.txt → chmod 004 myfile.txt" } },
+  { c: "3. Quiz: Storage Management", q: "17. Create a file and change both owner and group to \"root\"", a: "D", ch: { A: "touch myfile.txt → sudo chgrp root:root myfile.txt", B: "touch myfile.txt → sudo chmod root:root myfile.txt", C: "touch myfile.txt → sudo setuser root:root myfile.txt", D: "touch myfile.txt → sudo chown root:root myfile.txt" } },
+  { c: "3. Quiz: Storage Management", q: "18. Create a folder and a symbolic link to the folder", a: "A", ch: { A: "mkdir myfolder → ln -s myfolder mysymlink", B: "mkdir myfolder → ln myfolder mysymlink", C: "mkdir myfolder → link -s myfolder mysymlink", D: "mkdir myfolder → symlink myfolder mysymlink" } },
+  { c: "3. Quiz: Storage Management", q: "19. Show disk space usage in human-readable format", a: "C", ch: { A: "du -h", B: "fdisk -l", C: "df -h", D: "lsblk -h" } },
+  { c: "3. Quiz: Storage Management", q: "20. Show file space (≠ size) usage of /usr/share/dict/american-english in human-readable format", a: "B", ch: { A: "df -h /usr/share/dict/american-english", B: "du -h /usr/share/dict/american-english", C: "size -h /usr/share/dict/american-english", D: "ls -lh /usr/share/dict/american-english" } },
+  { c: "3. Quiz: Storage Management", q: "21. Check and repair file system on harddisk", a: "D", ch: { A: "lsblk -f → sudo chkdsk /dev/sdX", B: "fdisk -l → sudo repair /dev/sdX", C: "df -h → sudo format /dev/sdX", D: "lsblk -f → sudo fsck /dev/sdX" } },
+  { c: "3. Quiz: Storage Management", q: "22. Search for a given filename", a: "A", ch: { A: "sudo find / -name \"filename.txt\"", B: "sudo locate -r \"filename.txt\"", C: "sudo search / -name \"filename.txt\"", D: "sudo where \"filename.txt\"" } },
+  { c: "4. Quiz: User Management", q: "23. Change password", a: "C", ch: { A: "setpasswd", B: "chpass", C: "passwd", D: "password" } },
+  { c: "4. Quiz: User Management", q: "24. Show on-line users", a: "B", ch: { A: "userlist", B: "who", C: "id -u", D: "logged" } },
+  { c: "4. Quiz: User Management", q: "25. Show current users on the system and what they are doing", a: "D", ch: { A: "who -a", B: "top -u", C: "ps -u", D: "w" } },
+  { c: "4. Quiz: User Management", q: "26. Enable administrator (root or superuser) account", a: "A", ch: { A: "sudo passwd root", B: "sudo enable root", C: "sudo usermod -a root", D: "sudo active root" } },
+  { c: "4. Quiz: User Management", q: "27. Add a new user and remove", a: "C", ch: { A: "sudo newuser testuser → sudo rmuser testuser", B: "sudo createuser testuser → sudo removeuser testuser", C: "sudo adduser testuser → sudo deluser testuser", D: "sudo makeuser testuser → sudo dropuser testuser" } },
+  { c: "5. Quiz: Network Management", q: "28. Remote login to Linux", a: "D", ch: { A: "rlogin username@hostname_or_ip_address", B: "telnet username@hostname_or_ip_address", C: "connect username@hostname_or_ip_address", D: "ssh username@hostname_or_ip_address" } },
+  { c: "5. Quiz: Network Management", q: "29. Transfer a file to Linux", a: "B", ch: { A: "sendfile username@ip_address", B: "ftp username@ip_address", C: "getfile username@ip_address", D: "copy username@ip_address" } },
+  { c: "5. Quiz: Network Management", q: "30. Show IP address of your computer", a: "C", ch: { A: "netstat -ip", B: "ifquery", C: "ip a", D: "ipconfig" } },
+  { c: "5. Quiz: Network Management", q: "31. Show MAC address of your computer", a: "D", ch: { A: "ip mac", B: "ip route", C: "macshow", D: "ip link" } },
+  { c: "5. Quiz: Network Management", q: "32. Show IP address of google.com", a: "A", ch: { A: "dig google.com", B: "ns google.com", C: "route google.com", D: "ipfind google.com" } },
+  { c: "5. Quiz: Network Management", q: "33. Show connection speed to google.com", a: "C", ch: { A: "speedtest google.com", B: "netcat google.com", C: "ping google.com", D: "traceroute google.com" } },
+  { c: "5. Quiz: Network Management", q: "34. Download a file at 1.00AM tomorrow", a: "B", ch: { A: "cron 01:00 wget https://cache111.com/test.zip", B: "echo \"wget https://cache111.com/test.zip\" | at 01:00", C: "schedule 01:00 wget https://cache111.com/test.zip", D: "run-later --time 01:00 wget https://cache111.com/test.zip" } },
+  { c: "6. Quiz: Utility (1)", q: "35. Show the manual page of \"man\" command", a: "D", ch: { A: "info man", B: "help man", C: "man --guide", D: "man man" } },
+  { c: "6. Quiz: Utility (1)", q: "36. Show only the first 10 lines of /etc/passwd", a: "A", ch: { A: "head -n 10 /etc/passwd", B: "top -n 10 /etc/passwd", C: "first -10 /etc/passwd", D: "start -n 10 /etc/passwd" } },
+  { c: "6. Quiz: Utility (1)", q: "37. Show only the last 10 lines of /etc/passwd", a: "C", ch: { A: "end -n 10 /etc/passwd", B: "bottom -10 /etc/passwd", C: "tail -n 10 /etc/passwd", D: "last -n 10 /etc/passwd" } },
+  { c: "6. Quiz: Utility (1)", q: "38. Show the first page of /usr/share/dict/american-english and scroll to the next", a: "B", ch: { A: "cat /usr/share/dict/american-english", B: "less /usr/share/dict/american-english", C: "more /usr/share/dict/american-english", D: "page /usr/share/dict/american-english" } },
+  { c: "6. Quiz: Utility (1)", q: "39. Show only the line containing \"sys\" in /etc/passwd", a: "D", ch: { A: "find \"sys\" /etc/passwd", B: "match \"sys\" /etc/passwd", C: "cat /etc/passwd -s \"sys\"", D: "grep \"sys\" /etc/passwd" } },
+  { c: "6. Quiz: Utility (1)", q: "40. Show only the line ending with \"land\" in /usr/share/dict/american-english", a: "A", ch: { A: "grep \"land$\" /usr/share/dict/american-english", B: "grep \"^land\" /usr/share/dict/american-english", C: "grep \"*land\" /usr/share/dict/american-english", D: "grep \"land\\e\" /usr/share/dict/american-english" } },
+  { c: "6. Quiz: Utility (1)", q: "41. Count the number of lines in /usr/share/dict/american-english", a: "B", ch: { A: "wc -w /usr/share/dict/american-english", B: "wc -l /usr/share/dict/american-english", C: "wc -c /usr/share/dict/american-english", D: "wc -m /usr/share/dict/american-english" } },
+  { c: "6. Quiz: Utility (1)", q: "42. Open /usr/share/dict/american-english in a text editor, and search for \"microcomputer\"", a: "C", ch: { A: "nano /usr/share/dict/american-english → Ctrl + F microcomputer", B: "gedit /usr/share/dict/american-english → find microcomputer", C: "vim /usr/share/dict/american-english → /microcomputer → ENTER → :q → ENTER", D: "cat /usr/share/dict/american-english → grep microcomputer" } },
+  { c: "6. Quiz: Utility (1)", q: "43. Make a text file, put your firstname, save and display each character sequentially in hex", a: "D", ch: { A: "echo \"firstname\" > myname.txt → hexdump -s myname.txt", B: "touch myname.txt \"firstname\" → hexview myname.txt", C: "printf \"firstname\" > myname.txt → dump -h myname.txt", D: "echo -n \"firstname\" > myname.txt → xxd myname.txt" } },
+  { c: "6. Quiz: Utility (1)", q: "44. Make a text file, put your firstname, encrypt with password protection", a: "A", ch: { A: "echo \"firstname\" > secret.txt → gpg -c secret.txt", B: "echo \"firstname\" > secret.txt → encrypt -p secret.txt", C: "echo \"firstname\" > secret.txt → openssl secret.txt", D: "echo \"firstname\" > secret.txt → passwd secret.txt" } },
+  { c: "6. Quiz: Utility (1)", q: "45. Write a hello-world program in C, compile, and execute", a: "B", ch: { A: "vim hello.c → make hello.c → run hello", B: "vim hello.c → gcc -o hello hello.c → ./hello", C: "vim hello.c → cc -c hello.c → hello.exe", D: "vim hello.c → g++ hello.c -o hello → exec hello" } },
+  { c: "6. Quiz: Utility (1)", q: "46. Run a process that will continue after logout", a: "C", ch: { A: "bg sleep 100", B: "keep sleep 100", C: "nohup sleep 100 &", D: "daemon sleep 100 &" } },
+  { c: "6. Quiz: Utility (1)", q: "47. Shutdown in the next 10 minutes", a: "D", ch: { A: "sudo halt -m 10", B: "sudo poweroff 10", C: "sudo reboot +10", D: "sudo shutdown +10" } },
+  { c: "6. Quiz: Utility (1)", q: "48. Cancel the shutdown", a: "A", ch: { A: "sudo shutdown -c", B: "sudo shutdown -abort", C: "sudo shutdown -stop", D: "sudo shutdown -kill" } },
+  { c: "7. Quiz: Utility (2)", q: "49. Make a folder with a file inside and compress it to \"foldername.tar.gz\"", a: "B", ch: { A: "tar -xzf foldername.tar.gz myfolder", B: "tar -czf foldername.tar.gz myfolder", C: "tar -cvf foldername.tar.gz myfolder", D: "gzip foldername.tar.gz myfolder" } },
+  { c: "7. Quiz: Utility (2)", q: "50. Calculate the checksum of foldername.tar.gz", a: "C", ch: { A: "md5sum foldername.tar.gz", B: "cksum -s foldername.tar.gz", C: "sha256sum foldername.tar.gz", D: "hash256 foldername.tar.gz" } },
+  { c: "7. Quiz: Utility (2)", q: "51. Make a folder with a file inside and compress it to \"foldername.zip\"", a: "D", ch: { A: "zip -a foldername.zip myfolder", B: "zip -f foldername.zip myfolder", C: "compress foldername.zip myfolder", D: "zip -r foldername.zip myfolder" } },
+  { c: "7. Quiz: Utility (2)", q: "52. Calculate the checksum of foldername.zip", a: "A", ch: { A: "sha256sum foldername.zip", B: "crc32 foldername.zip", C: "sha1sum foldername.zip", D: "sum -256 foldername.zip" } },
+  { c: "7. Quiz: Utility (2)", q: "53. Create two files, concatenate them together using \"cat\", \">\" and \">>\"", a: "B", ch: { A: "cat file1.txt file2.txt >> combined.txt แล้วต่อท้ายด้วย cat file1.txt > combined.txt", B: "cat file1.txt file2.txt > combined.txt แล้วต่อท้ายด้วย cat file1.txt >> combined.txt", C: "cat file1.txt + file2.txt > combined.txt แล้วต่อท้ายด้วย cat file1.txt >> combined.txt", D: "cat file1.txt file2.txt | combined.txt แล้วต่อท้ายด้วย cat file1.txt & combined.txt" } },
+  { c: "7. Quiz: Utility (2)", q: "54. Split /usr/share/dict/american-english into 10 files (x00, x01, x02, ..., x09)", a: "C", ch: { A: "split -l 10 -d /usr/share/dict/american-english x", B: "split -b 10 /usr/share/dict/american-english x", C: "split -d -n 10 /usr/share/dict/american-english x", D: "split -c 10 /usr/share/dict/american-english x" } },
+  { c: "7. Quiz: Utility (2)", q: "55. Show only the first column in /etc/passwd", a: "D", ch: { A: "cut -c1 /etc/passwd", B: "awk -c1 /etc/passwd", C: "grep -f1 /etc/passwd", D: "cut -d: -f1 /etc/passwd" } },
+  { c: "7. Quiz: Utility (2)", q: "56. Show printer queue", a: "A", ch: { A: "lpq", B: "lpr -q", C: "printq", D: "lpstat -p" } },
+  { c: "7. Quiz: Utility (2)", q: "57. Show current date & time", a: "C", ch: { A: "time", B: "now", C: "date", D: "clock" } },
+  { c: "7. Quiz: Utility (2)", q: "58. Show calendar", a: "B", ch: { A: "calendar", B: "cal", C: "month", D: "dateshow" } }
+];
+
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+
+function renderQuestion() {
+  const item = quizData[currentIndex];
+  answered = false;
+  
+  document.getElementById("qIndex").innerText = `ข้อที่ ${currentIndex + 1} / ${quizData.length}`;
+  document.getElementById("qScore").innerText = `คะแนน: ${score}`;
+  document.getElementById("progressFill").style.width = `${((currentIndex) / quizData.length) * 100}%`;
+  document.getElementById("qCategory").innerText = item.c;
+  document.getElementById("qTitle").innerText = item.q;
+  
+  const choicesList = document.getElementById("choicesList");
+  choicesList.innerHTML = "";
+  
+  const feedback = document.getElementById("feedbackBox");
+  feedback.className = "feedback-box";
+  feedback.style.display = "none";
+  
+  document.getElementById("nextBtn").disabled = true;
+
+  ["A", "B", "C", "D"].forEach(letter => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.innerHTML = `<strong>${letter}.</strong> ${item.ch[letter]}`;
+    btn.onclick = () => selectChoice(letter, btn);
+    choicesList.appendChild(btn);
+  });
+}
+
+function selectChoice(chosen, btnEl) {
+  if (answered) return;
+  answered = true;
+  
+  const item = quizData[currentIndex];
+  const buttons = document.querySelectorAll(".choice-btn");
+  buttons.forEach(b => b.disabled = true);
+  
+  const feedback = document.getElementById("feedbackBox");
+  feedback.style.display = "block";
+
+  if (chosen === item.a) {
+    score++;
+    btnEl.classList.add("correct");
+    feedback.className = "feedback-box feedback-correct";
+    feedback.innerHTML = `✓ ถูกต้อง! คำตอบคือ <strong>ข้อ ${item.a}</strong>`;
+  } else {
+    btnEl.classList.add("incorrect");
+    buttons.forEach(b => {
+      if (b.innerText.startsWith(`${item.a}.`)) b.classList.add("correct");
+    });
+    feedback.className = "feedback-box feedback-wrong";
+    feedback.innerHTML = `✗ ยังไม่ถูกต้อง — เฉลยที่ถูกคือ <strong>ข้อ ${item.a}</strong>`;
+  }
+
+  document.getElementById("qScore").innerText = `คะแนน: ${score}`;
+  document.getElementById("nextBtn").disabled = false;
+}
+
+function nextQuestion() {
+  if (currentIndex < quizData.length - 1) {
+    currentIndex++;
+    renderQuestion();
+  } else {
+    showSummary();
+  }
+}
+
+function showSummary() {
+  const card = document.getElementById("quizCard");
+  const pct = Math.round((score / quizData.length) * 100);
+  card.innerHTML = `
+    <div class="score-summary">
+      <h2>🎉 ทำข้อสอบเสร็จสิ้น!</h2>
+      <div class="score-number">${score} / ${quizData.length}</div>
+      <p style="font-size:1.1rem; color:#94a3b8;">คิดเป็น ${pct}%</p>
+      <button class="btn" style="margin-top:20px;" onclick="location.reload()">🔄 เริ่มทำใหม่อีกครั้ง</button>
+    </div>
+  `;
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
